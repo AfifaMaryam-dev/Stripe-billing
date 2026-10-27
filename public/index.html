@@ -1,0 +1,145 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CloudDesk - Billing Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6fb;
+      color: #202536;
+      margin: 0;
+      padding: 40px 20px;
+    }
+
+    main {
+      max-width: 800px;
+      margin: auto;
+      text-align: center;
+    }
+
+    .plans {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 30px;
+    }
+
+    .plan {
+      background: white;
+      padding: 28px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px #00000010;
+      width: 260px;
+      box-sizing: border-box;
+    }
+
+    .price {
+      font-size: 30px;
+      font-weight: bold;
+    }
+
+    button {
+      background: #635bff;
+      color: white;
+      border: 0;
+      border-radius: 7px;
+      padding: 12px 18px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    .status {
+      display: none;
+      margin-top: 24px;
+      padding: 12px;
+      border-radius: 8px;
+      overflow-wrap: anywhere;
+    }
+
+    .status.visible {
+      display: block;
+      background: #e8edff;
+    }
+
+    .status.error {
+      background: #ffe8e8;
+      color: #a00000;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>CloudDesk</h1>
+    <p>Choose a subscription plan for your account.</p>
+
+    <div class="plans">
+      <section class="plan">
+        <h2>Basic</h2>
+        <p class="price">€10 <small>/ month</small></p>
+        <p>Essential features for getting started.</p>
+        <button data-plan="basic">Subscribe to Basic</button>
+      </section>
+
+      <section class="plan">
+        <h2>Premium</h2>
+        <p class="price">€25 <small>/ month</small></p>
+        <p>More features for growing teams.</p>
+        <button data-plan="premium">Subscribe to Premium</button>
+      </section>
+    </div>
+
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+  </main>
+
+  <script>
+    const statusBox = document.getElementById("status");
+
+    document.querySelectorAll("[data-plan]").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const plan = button.dataset.plan;
+        const originalText = button.textContent.trim();
+
+        button.disabled = true;
+        button.textContent = "Please wait...";
+
+        statusBox.className = "status visible";
+        statusBox.textContent = `Preparing ${plan} subscription...`;
+
+        try {
+          const response = await fetch("/api/subscribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ plan })
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || "Checkout request failed.");
+          }
+
+          if (!data.url) {
+            throw new Error("Checkout URL was not returned.");
+          }
+
+          window.location.assign(data.url);
+        } catch (error) {
+          statusBox.className = "status visible error";
+          statusBox.textContent = error.message;
+          button.disabled = false;
+          button.textContent = originalText;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

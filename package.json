@@ -1,0 +1,16 @@
+{
+  "name": "stripe-billing-starter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Beginner-friendly SaaS pricing app starter for learning Stripe Billing",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.9",
+    "express": "^4.21.2",
+    "stripe": "^23.0.1"
+  }
+}
